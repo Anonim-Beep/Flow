@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flower Rain</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #d0e8f5;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    .flower {
+      position: absolute;
+      cursor: pointer;
+      user-select: none;
+    }
+    .msg {
+      position: fixed;
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-style: italic;
+      pointer-events: none;
+      white-space: nowrap;
+      opacity: 1;
+      animation: pop 1.8s ease forwards;
+      z-index: 9999;
+    }
+    @keyframes pop {
+      0%   { opacity: 0; transform: translateY(0) scale(0.8); }
+      15%  { opacity: 1; transform: translateY(-16px) scale(1.05); }
+      75%  { opacity: 1; transform: translateY(-40px) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(0.9); }
+    }
+  </style>
+</head>
+<body>
+<audio id="bgm" src="lagu.mp3" loop autoplay></audio>
+<script>
+  const colors = ['#378ADD', '#ED93B1', '#E24B4A', '#7F77DD'];
+  const ns = 'http://www.w3.org/2000/svg';
+
+  function makeSVGFlower(color) {
+    const s = 32 + Math.random() * 20;
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', s);
+    svg.setAttribute('height', s + 12);
+    svg.setAttribute('viewBox', '-20 -20 40 40');
+
+    const hasLeaf = Math.random() > 0.4;
+    if (hasLeaf) {
+      const lc = Math.random() > 0.5 ? '#3B6D11' : '#639922';
+      const side = Math.random() > 0.5 ? 1 : -1;
+      const leaf = document.createElementNS(ns, 'ellipse');
+      leaf.setAttribute('cx', side * 13);
+      leaf.setAttribute('cy', 9);
+      leaf.setAttribute('rx', 10);
+      leaf.setAttribute('ry', 5);
+      leaf.setAttribute('fill', lc);
+      leaf.setAttribute('transform', `rotate(${side * 30} ${side * 13} 9)`);
+      svg.appendChild(leaf);
+    }
+
+    const petalCount = 5 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (360 / petalCount) * i;
+      const petal = document.createElementNS(ns, 'ellipse');
+      petal.setAttribute('cx', 0);
+      petal.setAttribute('cy', -9);
+      petal.setAttribute('rx', 5);
+      petal.setAttribute('ry', 9);
+      petal.setAttribute('fill', color);
+      petal.setAttribute('opacity', '0.9');
+      petal.setAttribute('transform', `rotate(${angle})`);
+      svg.appendChild(petal);
+    }
+
+    const center = document.createElementNS(ns, 'circle');
+    center.setAttribute('cx', 0);
+    center.setAttribute('cy', 0);
+    center.setAttribute('r', 6);
+    center.setAttribute('fill', '#fff8e7');
+    svg.appendChild(center);
+
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', 0);
+    dot.setAttribute('cy', 0);
+    dot.setAttribute('r', 3);
+    dot.setAttribute('fill', '#ffd166');
+    svg.appendChild(dot);
+
+    return svg;
+  }
+
+  function showMessage(x, y, color) {
+    const msg = document.createElement('div');
+    msg.className = 'msg';
+    msg.textContent = 'i love you so much';
+    msg.style.color = color;
+    msg.style.left = (x - 100) + 'px';
+    msg.style.top = (y - 20) + 'px';
+    document.body.appendChild(msg);
+    msg.addEventListener('animationend', () => msg.remove());
+  }
+
+  function spawnFlower() {
+    const el = document.createElement('div');
+    el.className = 'flower';
+
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    el.appendChild(makeSVGFlower(color));
+
+    const startX = Math.random() * (window.innerWidth - 50);
+    el.style.left = startX + 'px';
+    el.style.top = '-50px';
+
+    const duration = 4000 + Math.random() * 4000;
+    const swing = (Math.random() - 0.5) * 100;
+    const rot = (Math.random() - 0.5) * 360;
+
+    el.style.transition = `top ${duration}ms linear, left ${duration}ms ease-in-out, transform ${duration}ms linear`;
+    document.body.appendChild(el);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.top = (window.innerHeight + 50) + 'px';
+        el.style.left = (startX + swing) + 'px';
+        el.style.transform = `rotate(${rot}deg)`;
+      });
+    });
+
+    el.addEventListener('click', function(e) {
+      showMessage(e.clientX, e.clientY, color);
+    });
+
+    setTimeout(() => el.remove(), duration + 300);
+  }
+
+  for (let i = 0; i < 15; i++) {
+    setTimeout(spawnFlower, i * 100);
+  }
+  setInterval(spawnFlower, 300);
+</script>
+</body>
+</html>
